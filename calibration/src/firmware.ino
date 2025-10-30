@@ -50,7 +50,7 @@ String labels[4] = {"FRONT LEFT - M1: ", "FRONT RIGHT - M2: ", "REAR LEFT - M3: 
 
 void setup()
 {
-    Serial.begin(9600);
+    Serial.begin(115200);
     while (!Serial) {
     }
     Serial.println("Sampling process will spin the motors at its maximum RPM.");
@@ -65,23 +65,34 @@ void setup()
 void loop()
 {
     static String cmd = "";
+    
+//    Serial.println("loop active");
 
     while (Serial.available())
     {
         char character = Serial.read(); 
         cmd.concat(character); 
-        Serial.print(character);
+//        Serial.println(character);
         delay(1);
-        if(character == '\r' and cmd.equals("spin\r"))
+        if(character == '\r' || character == '\n'|| cmd.equals("spin")) 
         {
-            cmd = "";
-            Serial.println("\r\n");
-            sampleMotors(0);
+            cmd.trim();
+
+            Serial.print("Received command: [");
+            Serial.print(cmd);
+            Serial.println("]");
+
+            if(cmd.equals("spin"))
+            {
+                cmd = "";
+                //Serial.println("\r111\n");
+                sampleMotors(0);
+            }
         }
-        else if(character == '\r' and cmd.equals("sample\r"))
+        else if(cmd.equals("sample"))    //if(character == '\r' and cmd.equals("sample\r"))
         {
             cmd = "";
-            Serial.println("\r\n");
+            //Serial.println("\r222\n");
             sampleMotors(1);
         }
         else if(character == '\r')
@@ -184,3 +195,4 @@ void printSummary()
     Serial.print(max_angular.angular_z);
     Serial.println(" rad/s");
 }
+
